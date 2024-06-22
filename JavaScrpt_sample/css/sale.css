@@ -121,7 +121,7 @@ body {
 
 .btn {
     display: inline-block;
-    padding: 0.8rem 2px;
+    padding: 0.8rem 2rem;
     z-index: 10;
     text-align: center;
     border-radius: 5px;
