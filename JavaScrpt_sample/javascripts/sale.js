@@ -1,82 +1,94 @@
-const products = [
-    {
-        id: 1,
-        name: "Mezcla original 200g",
-        price: 500,
-    },
-    {
-        id: 2,
-        name: "Mezcla original 500g",
-        price: 900,
-    },
-    {
-        id: 3,
-        name: "Mezcla especial 200g",
-        price: 700,
-    },
-    {
-        id: 4,
-        name: "Mezcla especial 500g",
-        price: 1200,
-    },
-];
-
-const priceElement = document.getElementById("product");
+// Obtener elementos del DOM para el producto y la cantidad
+const productElement = document.getElementById("product");
 const numberElement = document.getElementById("number");
+
+// Inicializar un array vacío para almacenar las compras
 let purchases = [];
 
+
+// Función para obtener el producto por su ID
+function getProductById(productId) {
+    return products.find(product => product.id === productId);
+}
+
+// Función para añadir una compra
+function addPurchase(product, number) {
+    purchases.push({
+        nombre: product.nombre,
+        precio: product.precio,
+        number: number
+    });
+    window.alert(`Nombre: ${product.nombre}. \nPrecio: ${product.precio} yenes. \nCantidad: ${number} unidades.`);
+}
+
+// Función para validar la cantidad
+function validateNumber(number) {
+    return !isNaN(number) && number > 0;
+}
+
+// Función principal para añadir un producto a las compras
 function add() {
-    const targetId = parseInt(priceElement.value);
-    const product = products.find((item) => item.id == targetId);
-    const number = numberElement.value;
+    const productId = parseInt(productElement.value);
+    const number = parseInt(numberElement.value);
 
-    let purchase = {
-        product: product,
-        number: parseInt(number),
-    };
-
-    const newPurchase = purchases.findIndex((item) => item.product.id === purchase.product.id);
-    if (purchases.length < 1 || newPurchase === -1) {
-        purchases.push(purchase);
-    } else {
-        purchases[newPurchase].number += purchase.number;
+    if (!validateNumber(number)) {
+        window.alert("Seleccione una cantidad válida antes de continuar, Por favor.");
+        return;
     }
 
-    window.alert(`${display()}\n subtotal ${subtotal()} yenes.`);
-    priceElement.value = "";
-    numberElement.value = "";
+    const product = getProductById(productId);
+
+    if (product) {
+        addPurchase(product, number);
+    } else {
+        window.alert("Producto no hallado.");
+    }
 }
 
-function subtotal() {
-    return purchases.reduce((prev, purchase) => {
-        return prev + purchase.product.price * purchase.number;
-    }, 0);
+// Función para calcular el total de las compras
+function calc() {
+    let sum = 0;
+    let postage = '';
+
+    purchases.forEach(purchase => {
+        const subtotal = purchase.precio * purchase.number;
+        sum += subtotal;
+        postage += `${purchase.nombre} \n ${purchase.number} unidades: ${subtotal} yenes.\n`;
+    });
+
+    const shippingCost = calcPostageFromPurchase(sum);
+    const total = sum + shippingCost;
+
+    window.alert(`${postage}\nSubtotal: ${sum} yenes. \nLa tarifa del envío es: ${shippingCost} yenes. \nTotal a pagar: ${total} yenes.`);
+
+    resetPurchases();
 }
 
-function display() {
-    return purchases.map((purchase) => {
-        return `${purchase.product.name} , ${purchase.product.price} yenes : ${purchase.number} productos.\n`;
-    })
-        .join("");
-}
-
-function calcPostageFromPurchase(sum) {
-    if (sum == 0 || sum >= 3000) {
-        return 0;
-    } else if (sum < 1000) {
+// Función para calcular los gastos de envío basados en el subtotal
+function calcPostageFromPurchase(subtotal) {
+    if (subtotal <= 3000) {
+        return 500;
+    } else if (subtotal < 1000) {
         return 500;
     } else {
         return 250;
     }
 }
 
-function calc() {
-    const sum = subtotal();
-    const postage = calcPostageFromPurchase(sum);
-    window.alert(
-        `${display()}\n el subtotal: ${sum} yenes.\n La tarifa del envío es: ${postage} yenes.\n 
-      El total: ${sum + postage} yenes.`);
+// Función para reiniciar las compras y los valores de los elementos del formulario
+function resetPurchases() {
     purchases = [];
-    priceElement.value = "";
+    productElement.value = "";
     numberElement.value = "";
 }
+
+// Lista de productos disponibles con sus respectivos precios y nombres
+const products = [
+    {id: 1, nombre: "Mezcla original 200g", precio: 500},
+
+    {id: 2, nombre: "Mezcla original 500g", precio: 900},
+
+    {id: 3, nombre: "Mezcla especial 200g", precio: 700},
+
+    {id: 4, nombre: "Mezcla especial 500g",precio: 1200},
+];
